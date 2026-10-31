@@ -124,10 +124,13 @@ export async function remoteReplaceAll(data: AppData) {
   );
 }
 
-export async function sendMagicLink(email: string) {
-  const { error } = await need().auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.origin, shouldCreateUser: true },
-  });
-  if (error) throw new Error(error.message);
+/** The single owner account. Only the password is typed; it is never stored in source or env. */
+export const OWNER_EMAIL: string = import.meta.env.VITE_OWNER_EMAIL || 'mx9556@gmail.com';
+
+export async function signInOwner(password: string) {
+  const { error } = await need().auth.signInWithPassword({ email: OWNER_EMAIL, password });
+  if (error) {
+    const wrong = error.code === 'invalid_credentials' || /invalid (login )?credentials/i.test(error.message);
+    throw new Error(wrong ? 'Wrong password. Try again.' : error.message);
+  }
 }

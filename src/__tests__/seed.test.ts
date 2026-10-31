@@ -91,6 +91,15 @@ describe('seed data', () => {
   it('supabase/seed.sql is in sync with seed.ts', () => {
     const sql = readFileSync(new URL('../../supabase/seed.sql', import.meta.url), 'utf8');
     for (const r of SEED_ROWS) expect(sql).toContain(`'${r.title.replace(/'/g, "''")}'`);
-    expect(sql.match(/^  \('/gm)?.length).toBe(SEED_AREAS.length + SEED_ROWS.length);
+    expect(sql.match(/^  \(E?'/gm)?.length).toBe(SEED_AREAS.length + SEED_ROWS.length);
+  });
+});
+
+describe('supabase sql files', () => {
+  it('are pure ASCII so pasting into the SQL editor cannot cause mojibake', () => {
+    for (const f of ['supabase/seed.sql', 'supabase/migrations/0001_init.sql']) {
+      const text = readFileSync(new URL(`../../${f}`, import.meta.url), 'utf8');
+      expect([...text].filter((c) => c.charCodeAt(0) > 127), f).toEqual([]);
+    }
   });
 });

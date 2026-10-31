@@ -28,17 +28,20 @@ With no `.env.local`, the app starts in **local mode**: data is stored in this b
    This creates `areas`, `tasks`, `editors`, the RLS policies (anyone may `SELECT`; only editors may insert/update/delete),
    the `replace_all` function used by Import/Reset, and adds the tables to the Realtime publication.
 3. **Load the tasks:** run [`supabase/seed.sql`](supabase/seed.sql) in the SQL Editor (safe to re-run; it only inserts missing rows).
+   Both SQL files are pure ASCII (the em dash is written as `E'\u2014'`), so copy/paste can't garble characters.
 4. **Add yourself as the owner/editor** (SQL Editor):
    ```sql
    insert into public.editors (email) values ('your-email@example.com');  -- lowercase
    ```
-5. **Enable email auth:** Authentication → Sign In / Providers → Email = enabled (magic links are on by default).
-6. **Your user is created on first sign-in:** just use **Owner sign in** on the site with the same email.
-   The app calls `signInWithOtp` with `shouldCreateUser: true` and `emailRedirectTo: window.location.origin`, so anyone can
-   request a magic link and get a (read-only) account — but only emails listed in `editors` can write anything (RLS + `is_editor()`).
-   If you'd rather block sign-ups entirely, invite yourself under Authentication → Users and turn off *Allow new users to sign up*.
-7. **URL configuration:** Authentication → URL Configuration → set **Site URL** to your Netlify URL
-   (e.g. `https://homebase-tracker.netlify.app`) and add it (plus `https://homebase-tracker.netlify.app/**` and `http://localhost:5173` for dev) to **Redirect URLs**. The magic link returns to the site root (`window.location.origin`).
+5. **Create the owner login:** Authentication → Users → *Add user* → *Create new user* with the owner email
+   (`mx9556@gmail.com`, or whatever you set in `VITE_OWNER_EMAIL`), a password, and *Auto Confirm User* checked.
+   Make sure Authentication → Sign In / Providers → Email is enabled.
+6. **Signing in:** on the site tap **Owner sign in**, type the password, and tap **Sign in**. There is no email field and no magic link:
+   the app calls `signInWithPassword({ email: OWNER_EMAIL, password })`. A wrong password shows "Wrong password".
+   **Change the password** any time in Supabase Dashboard → Authentication → Users → (the owner) → *Reset password* / update.
+   The password is never stored in the code, env vars, or this README.
+7. **URL configuration (optional now):** Authentication → URL Configuration → set **Site URL** to `https://homebase-tracker.netlify.app`.
+   No redirect URLs are needed for password sign-in.
 8. Copy **Project URL** and the **anon public key** from Project Settings → API (or *Connect*). The anon key is meant to be public; RLS is what protects writes. Never use the `service_role` key in the frontend.
 
 ### How permissions work
@@ -59,8 +62,8 @@ With no `.env.local`, the app starts in **local mode**: data is stored in this b
    - `VITE_SUPABASE_URL` = `https://<project-ref>.supabase.co`
    - `VITE_SUPABASE_ANON_KEY` = your anon public key
 4. Deploy (or *Trigger deploy → Clear cache and deploy* after changing env vars — Vite inlines them at build time).
-5. Put the final Netlify URL into Supabase Site URL / Redirect URLs (step 7 above).
-6. Open the site, tap **Owner sign in**, enter your email, and click the link in the email. Edit controls appear once you're recognized as an editor.
+5. Put the final Netlify URL into the Supabase Site URL (step 7 above).
+6. Open the site, tap **Owner sign in**, enter the password, and tap **Sign in**. Edit controls appear once you're recognized as an editor; **Sign out** is in the header.
 
 ## Using it
 

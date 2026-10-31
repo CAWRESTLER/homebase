@@ -1,6 +1,6 @@
--- Homebase — project tracker schema
+-- Homebase - project tracker schema
 -- Public (anon) can READ; only users listed in public.editors can WRITE.
--- Run this in Supabase → SQL Editor (or `supabase db push`).
+-- Run this in Supabase -> SQL Editor (or `supabase db push`).
 
 create extension if not exists pgcrypto;
 
