@@ -33,11 +33,12 @@ With no `.env.local`, the app starts in **local mode**: data is stored in this b
    insert into public.editors (email) values ('your-email@example.com');  -- lowercase
    ```
 5. **Enable email auth:** Authentication → Sign In / Providers → Email = enabled (magic links are on by default).
-6. **Create your user:** Authentication → Users → *Add user* → *Send invitation* to the same email.
-   (The app calls `signInWithOtp` with `shouldCreateUser: false`, so strangers can't create accounts from the sign-in form.
-   Even if they could, they would not be in `editors` and could not write anything.)
+6. **Your user is created on first sign-in:** just use **Owner sign in** on the site with the same email.
+   The app calls `signInWithOtp` with `shouldCreateUser: true` and `emailRedirectTo: window.location.origin`, so anyone can
+   request a magic link and get a (read-only) account — but only emails listed in `editors` can write anything (RLS + `is_editor()`).
+   If you'd rather block sign-ups entirely, invite yourself under Authentication → Users and turn off *Allow new users to sign up*.
 7. **URL configuration:** Authentication → URL Configuration → set **Site URL** to your Netlify URL
-   (e.g. `https://homebase-xyz.netlify.app`) and add it (plus `http://localhost:5173` for dev) to **Redirect URLs**.
+   (e.g. `https://homebase-tracker.netlify.app`) and add it (plus `https://homebase-tracker.netlify.app/**` and `http://localhost:5173` for dev) to **Redirect URLs**. The magic link returns to the site root (`window.location.origin`).
 8. Copy **Project URL** and the **anon public key** from Project Settings → API (or *Connect*). The anon key is meant to be public; RLS is what protects writes. Never use the `service_role` key in the frontend.
 
 ### How permissions work

@@ -127,7 +127,7 @@ export async function remoteReplaceAll(data: AppData) {
 export async function sendMagicLink(email: string) {
   const { error } = await need().auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.origin + window.location.pathname, shouldCreateUser: false },
+    options: { emailRedirectTo: window.location.origin, shouldCreateUser: true },
   });
   if (error) throw new Error(error.message);
 }
